@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cifrados Polialfabeticos</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>  
+</head>
+<body>
+    <div class="container">
+        <div class="center-block">
+            <h1>Cifrados Polialfabeticos</h1>
+            <p>Escoja el tipo de cifrado a utilizar</p>
+            <input type="radio" name="cipher" id="cesar" checked>
+            <label for="cesar">Cifrado César</label>
+            <input type="radio" name="cipher" id="vigenere">
+            <label for="vigenere">Cifrado Vigenère</label>
+            <div class="form-group">
+                <h3>Ingrese el texto a cifrar</h3>
+                <textarea id="txt"  class="form-control"></textarea>
+            </div>
+            <h3>Ingrese la clave secreta:</h3>
+            <input type="text" id="txtClave" onpaste="return false;" ondrop="return false;" >
+            <p>
+                <input type="button" class="btn btn-info" value="Cifrar" id="logcifrar" onclick="longitudCifrar()" disabled>
+                <input type="button" class="btn btn-info" value="Descifrar" id="logdescifrar" onclick="longitudDescifrar()" disabled>
+                <input type="button" class="btn btn-info" value="Reiniciar"  onclick="reiniciar()">
+            </p>
+            <div class="form-group">
+                <label for="desplazamiento">Desplazamiento</label>
+                <input type="range" min="1" max="25" step="1" value="1" id="desplazamiento" class="form-control" >
+            </div>
+            <div class="form-group">
+                <label for="cifrado">Texto cifrado</label>
+                <textarea id="cifrado" class="form-control" disabled></textarea>
+            </div>
+        </div>
+    </div>
+    <script src="01Cesar/js/cesar.js"></script>
+    <script src="02Viggenere/js/viggenere.js"></script>
+    <!-- <script src="main.js"></script> -->
+</body>
+</html>
