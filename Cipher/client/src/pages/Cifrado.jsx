@@ -3,25 +3,35 @@ import CryptoJS from "crypto-js";
 import axios from "axios";
 import io from "socket.io-client";
 import ReactMarkdown from "react-markdown";
+import { IP } from "../../../src/getPublicIP";
 
-const socket = io("http://localhost:3000/");
-
-axios.defaults.baseURL = "http://localhost:3000";
+const socket = io(`http://${IP}:3000/`);
+axios.defaults.baseURL = `http://${IP}:3000`;
 export default function Cifrado() {
   //Estados
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
   const [downloadLink, setDownloadLink] = useState(null);
   const [down, setDown] = useState(null);
+  const [downFile, setDownFile] = useState(null);
 
-  //Mensajeria De Usuarios
   useEffect(() => {
     socket.on("message", receiveMessage);
+    socket.on("fileUploaded", handleFileUploaded);
 
     return () => {
       socket.off("message", receiveMessage);
+      socket.off("fileUploaded", handleFileUploaded);
     };
   }, []);
+
+  const handleFileUploaded = (fileContent) => {
+    const blob = new Blob([fileContent], {
+      type: "text/plain;charset=utf-8",
+    });
+    const downloadUrl = URL.createObjectURL(blob);
+    setDownFile(downloadUrl);
+  };
 
   const receiveMessage = (message) =>
     setMessages((state) => [...state, message]);
@@ -35,25 +45,6 @@ export default function Cifrado() {
     setMessages((state) => [...state, newMessage]);
     setMessage("");
     socket.emit("message", newMessage.body);
-  };
-
-  //Portapapeles
-  const handleCopyToClipboard = (text) => {
-    const textArea = document.createElement("textarea");
-    textArea.value = text;
-    document.body.appendChild(textArea);
-    textArea.select();
-
-    try {
-      document.execCommand("copy");
-      alert(
-        "Texto copiado al portapapeles \n !!!Pegalo en tu chat!!! N DEBES DE INCLUIR EL BOB:"
-      );
-    } catch (err) {
-      alert("No se pudo copiar el texto al portapapeles");
-    }
-
-    document.body.removeChild(textArea);
   };
 
   //ENCRIPTADO
@@ -84,14 +75,7 @@ export default function Cifrado() {
       });
       const downloadUrl = URL.createObjectURL(blob);
       setDownloadLink(downloadUrl);
-
-      //   const linkMessage = `¡Aquí tienes el archivo cifrado! Descárgalo:
-      // "[Enlace al archivo cifrado]( ${downloadUrl} )" "clave": ${key}`;
-      const linkMessage = `¡Aquí tienes el archivo cifrado! Descárgalo: 
-     ${downloadUrl}   "clave": ${key}`;
-      // Copiar el mensaje al portapapeles
-      console.log(linkMessage);
-      handleCopyToClipboard(linkMessage);
+      socket.emit("fileUpload", encryptedText);
     };
     reader.readAsText(file, "UTF-8");
   };
@@ -132,37 +116,6 @@ export default function Cifrado() {
     reader.readAsText(file, "UTF-8");
   };
 
-  const handleDownload = () => {
-    const urlInput = document.getElementById("urlSend").value;
-
-    if (!urlInput) {
-      alert("Por favor, ingrese una URL válida");
-      return;
-    }
-
-    // Realizar una solicitud a la URL especificada
-    fetch(urlInput)
-      .then((response) => response.blob())
-      .then((blob) => {
-        // Crear un enlace de descarga para el archivo
-        const downloadLink = document.createElement("a");
-
-        // Configurar el atributo href con la URL Blob del archivo
-        downloadLink.href = window.URL.createObjectURL(blob);
-
-        // Configurar el nombre de archivo que se muestra al descargar (opcional)
-        downloadLink.download = "archivo_descargado_del_enlace";
-
-        // Simular un clic en el enlace para iniciar la descarga
-        downloadLink.click();
-      })
-      .catch((error) => {
-        alert(
-          "No se pudo descargar el archivo desde la URL especificada: " + error
-        );
-      });
-  };
-
   return (
     <>
       <div className="bg-slate-400 p-10">
@@ -191,7 +144,7 @@ export default function Cifrado() {
             className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
             onClick={handleEncrypt}
           >
-            Copiar al portapapeles
+            Encryptar
           </button>
           {downloadLink && (
             <>
@@ -206,29 +159,6 @@ export default function Cifrado() {
           )}
         </div>
       </div>
-      <div className="bg-slate-400 p-10">
-        <div className="container mx-auto max-w-lg p-4 bg-gray-100">
-          <h1 className="text-2xl font-semibold mb-4 text-black">
-            Descargar mediante Enlace
-          </h1>
-          <div className="mb-4">
-            <input
-              type="text"
-              id="urlSend"
-              className="w-full py-2 px-4 border border-gray-400 rounded"
-              placeholder="Sube el link"
-            />
-          </div>
-          <button
-            id="downButton"
-            className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
-            onClick={handleDownload}
-          >
-            Descargar mediante Link
-          </button>
-        </div>
-      </div>
-
       <div className="bg-slate-400 p-10">
         <div className="container mx-auto max-w-lg p-4 bg-gray-100">
           <h1 className="text-2xl font-semibold mb-4 text-black">
@@ -271,7 +201,6 @@ export default function Cifrado() {
           )}
         </div>
       </div>
-
       <div className="h-screen bg-slate-400 text-black flex items-center justify-center m-0 p-0">
         <form
           onSubmit={handleSubmitMessage}
@@ -312,10 +241,18 @@ export default function Cifrado() {
             value={message}
             autoFocus
           />
+          <p></p>
+          {downFile && (
+            <a
+              download="archivo_encryptado.txt"
+              href={downFile}
+              className="w-full bg-blue-500 text-white py-2 px-4 rounded mt-2 hover:bg-blue-600"
+            >
+              Descargar Archivo
+            </a>
+          )}
         </form>
       </div>
-
-     
     </>
   );
 }

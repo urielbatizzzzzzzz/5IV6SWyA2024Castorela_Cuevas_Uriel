@@ -7,7 +7,6 @@ const app = express();
 
 app.use(
     cors({
-      origin:5173, 
       credentials: true,
     })
   ); //Se esta asignando que hosts pueden interactuar con el back  

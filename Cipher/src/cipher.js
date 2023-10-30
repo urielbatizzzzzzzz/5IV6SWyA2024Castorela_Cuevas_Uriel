@@ -1,7 +1,3 @@
-import fs from "fs";
-import crypto from "crypto";
-import path from "path";
-import os from "os";
 import CryptoJS from 'crypto-js';
 
 export const descifrado = async (req, res) => {
@@ -24,4 +20,15 @@ export const descifrado = async (req, res) => {
   } catch (error) {
       res.status(500).send('Error al descifrar el archivo: ' + error.message);
   }
+}
+
+export const upload=async(req,res)=>{
+    const file = req.file;
+    if (file) {
+      console.log("Archivo .txt subido:", file.originalname);
+      
+      res.send("Archivo subido con éxito.");
+    } else {
+      res.status(400).send("Error al subir el archivo.");
+    }
 }
